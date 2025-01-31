@@ -2,7 +2,9 @@ const express = require("express");
 const path = require("path");
 
 const app = express();
-const PORT = 3300;
+
+// Use the port from environment variable (Render dynamically assigns this port)
+const PORT = process.env.PORT || 3300;
 
 // Mock "database" for users (you would replace this with an actual database in production)
 const usersDb = [
@@ -41,7 +43,6 @@ app.get("/", (req, res) => {
 // POST route for login
 app.post("/login", (req, res) => {
   const { name, password } = req.body;
-  console.log(name, password);
 
   // Check if user exists in the "database"
   const user = usersDb.find((user) => user.username === name);
@@ -63,6 +64,7 @@ app.post("/logout", (req, res) => {
   res.json({ success: true });
 });
 
+// Listen on dynamic port provided by Render, or default to 3300 for local development
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
