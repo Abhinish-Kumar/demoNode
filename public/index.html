@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      #userProfile {
+        display: none;
+      }
+      .show {
+        display: block;
+      }
+      .error {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="userProfile">
+        <h1>User Profile</h1>
+        <p id="profileName"></p>
+        <p id="profileEmail"></p>
+        <p id="profileBio"></p>
+        <div>
+          <button id="logout">Logout</button>
+        </div>
+      </div>
+      <div id="loginPage">
+        <form id="loginForm">
+          <input type="text" placeholder="username" class="name" />
+          <input type="password" placeholder="password" class="password" />
+          <button>Submit</button>
+          <p class="error"></p>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      if (sessionStorage.getItem("loggedIn") === "true") {
+        showProfile();
+      }
+
+      document
+        .querySelector("#loginForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const name = document.querySelector(".name").value;
+          const password = document.querySelector(".password").value;
+
+          const response = await fetch("/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ name, password }),
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            sessionStorage.setItem("loggedIn", "true");
+            // Update profile with the returned data
+            document.getElementById(
+              "profileName"
+            ).innerText = `Name: ${data.profile.name}`;
+            document.getElementById(
+              "profileEmail"
+            ).innerText = `Email: ${data.profile.email}`;
+            document.getElementById(
+              "profileBio"
+            ).innerText = `Bio: ${data.profile.bio}`;
+            showProfile();
+          } else {
+            document.querySelector(".error").innerText =
+              data.message || "Invalid credentials";
+          }
+        });
+
+      function showProfile() {
+        document.getElementById("loginPage").style.display = "none";
+        document.getElementById("userProfile").style.display = "block";
+      }
+
+      document.getElementById("logout").addEventListener("click", async (e) => {
+        e.preventDefault();
+        await fetch("/logout", {
+          method: "POST",
+        });
+        sessionStorage.setItem("loggedIn", "false");
+        window.location.reload();
+      });
+    </script>
+  </body>
+</html>
